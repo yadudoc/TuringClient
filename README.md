@@ -53,7 +53,22 @@ Here is a brief description of each of these different requests:
 ### Submit
 
 To submit a job you must have a fresh auth token (less than an hour old) and a description of your
-job in JSON. The JSON description is simple and captures the 
+job in JSON. The JSON description is simple and captures the
+
+```json
+{ "user_email"         : "yadunand@uchicago.edu",
+  "executable"         : "/bin/echo test.sh",
+  "queue"              : "Test",
+  "script_name"        : "test.sh",
+  "script"             : "#!/bin/bash \n echo Hello World &> foo.txt ",
+  "jobtype"            : "script",
+  "output_file_stdout" : "STDOUT.txt",
+  "output_file_stderr" : "STDERR.txt",
+  "outputs"            : "foo.txt",
+  "walltime"           : "5"
+}
+
+```
 
 Here's how you'd submit a job that you've described in json
 
