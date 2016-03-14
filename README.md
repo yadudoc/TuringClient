@@ -60,7 +60,7 @@ be http urls or S3 urls.
 ```json
 {
   "user_email"         : "<EMAIL_ADDRESS_REGISTERED_WITH_TURING>",
-  "executable"         : "/bin/echo test.sh",
+  "executable"         : "/bin/bash test.sh",
   "queue"              : "Test",
   "script_name"        : "test.sh",
   "script"             : "#!/bin/bash \n echo 'Hello World' &> foo.txt ",
