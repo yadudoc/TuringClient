@@ -93,7 +93,7 @@ def fetch_outputs(jobid):
     
     results = record.json()
     if results['status'] != 'completed':
-        print "JOB[{0}] is not in completed state. Results cannot be fetched"
+        print "JOB[{0}] is not in completed state. Results cannot be fetched".format(jobid)
         exit(-1)
 
     try:
