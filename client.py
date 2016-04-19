@@ -69,7 +69,10 @@ def status_task(jobid):
     debug_print("Status task : {0}".format(jobid))
     status = {}
     record = requests.get(STATUS_URL + "/{0}".format(jobid))
-    
+    if record.status_code != 200:
+        print "[ERROR] Failed to fetch job, please check jobid"
+        exit(-1)
+
     results = record.json()
     for index in results['items']:
         k = results['items'][index].keys()[0]
