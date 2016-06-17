@@ -15,7 +15,7 @@ from urlparse import urlparse
 import requests
 import urllib
 
-SERVER_URL="http://52.2.217.165:8888"
+SERVER_URL="http://ec2-52-2-217-165.compute-1.amazonaws.com:8888"
 SUBMIT_URL=SERVER_URL+"/rest/v1/submit_task"
 STATUS_URL=SERVER_URL+"/rest/v1/status_task"
 CANCEL_URL=SERVER_URL+"/rest/v1/cancel_task"
@@ -127,6 +127,7 @@ def list_jobs(authfile):
     data = {"access_token" : auth['access_token']}
     r = requests.get(LIST_URL, data=data)
 
+    print r
     results =  r.json()
     if results['status'] == "Success":
         print "{0:40}|{1:15}|{2:10}|{3:20}".format("JOBID", "STATUS", "JOBTYPE", "SUBMIT_STAMP")

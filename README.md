@@ -1,13 +1,15 @@
-# REST Client for TuringCompute
+# REST Client for Cloud Kotta
 
-This is documentation for the REST client that can be used to manage jobs on the TuringCompute platform.
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+This is documentation for the REST client that can be used to manage jobs on the Cloud Kotta platform.
+TuringCompute.net is an instance of the Cloud Kotta architecture hosted by the Knowledge Lab on AWS.
 
 ## Access to the Bastion Host
 
-Once you have setup an account with TuringCompute shoot an email to yadunand@uchicago.edu with your
+Once you have setup an account with Cloud Kotta shoot an email to yadunand@uchicago.edu with your
 ssh public key to grant you a login account on bastion.turingcompute.net. This is where you'll be
-using the REST client to manage jobs on  Turing Compute.
+using the REST client to manage jobs on Cloud Kotta.
 
 ## Getting started
 
@@ -29,8 +31,8 @@ valid access_token. However this does limit scriptability/automation.
 
 Here are the steps to get this temporary access_token:
 
-1. Go to [TuringCompute](https://turingcompute.net/login)
-2. Click Login with Amazon button, and login using credentials that have been registered with TuringCompute
+1. Go to [Cloud Kotta](https://turingcompute.net/login)
+2. Click Login with Amazon button, and login using credentials that have been registered with Cloud Kotta
    which will take you to the Login Success page.
 3. Copy the complete url from your address bar from the Login Success page to a file.
 4. Specify this file using the -a or --auth flag to the client when making requests that require user authentication.
