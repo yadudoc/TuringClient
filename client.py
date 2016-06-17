@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-import boto
 import sys
 import json
 import time
-import boto.sqs
 import uuid
 import argparse
 import bottle
