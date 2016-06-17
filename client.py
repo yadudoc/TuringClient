@@ -7,7 +7,6 @@ import uuid
 import argparse
 import bottle
 import os
-from bottle import template
 import ast
 from urlparse import urlparse
 import requests
@@ -146,15 +145,12 @@ if __name__ == "__main__":
     parser.add_argument("-j", "--jobinfo",  help="json job description or jobid", required=True)
     parser.add_argument("-a", "--authfile", help="File with auth info")
     parser.add_argument("-r", "--request",  help="Request type [submit, status, cancel, fetch, list]", required=True)
-    parser.add_argument("-c", "--conffile", default="production.conf", help="Config file path. Defaults to ./test.conf")
     parser.add_argument("-v", "--verbose",  dest='verbose', action='store_true', help="Verbose output")
     args   = parser.parse_args()
 
 
     if args.verbose is True:
         GLOBAL_VERBOSE=True
-
-    #app = conf_man.load_configs(args.conffile)
 
     if args.request.lower() == "submit":
         if not args.authfile :
