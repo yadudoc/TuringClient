@@ -21,9 +21,15 @@ run_with_version()
     grep -i "Job_id" $results
 }
 
+# Check if we are on bastion
+# We can do submission tests only from bastion, therefore skip the submit/cancel/status tests unless you are on bastion
 
-
-run_with_version 2 ./samples/pass/
-run_with_version 3
-
-echo "Done"
+if [[ "$(curl -m 2 -s http://169.254.169.254/latest/meta-data/public-hostname)" == "ec2-52-86-208-63.compute-1.amazonaws.com" ]]
+then
+    echo "On bastion"
+    run_with_version 2 ./samples/pass/
+    run_with_version 3
+else
+    echo "Cannot run any remote tests right now from non-bastion nodes"
+    echo "Done"
+fi
