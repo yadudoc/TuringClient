@@ -16,8 +16,9 @@ SERVER_URL = "http://ec2-52-2-217-165.compute-1.amazonaws.com:8888"
 SUBMIT_URL = SERVER_URL+"/rest/v1/submit_task"
 STATUS_URL = SERVER_URL+"/rest/v1/status_task"
 CANCEL_URL = SERVER_URL+"/rest/v1/cancel_task"
-LIST_URL = SERVER_URL+"/rest/v1/list_tasks"
+LIST_URL   = SERVER_URL+"/rest/v1/list_tasks"
 
+GLOBAL_VERBOSE=False
 
 def debug_print(string):
     if GLOBAL_VERBOSE:
@@ -159,14 +160,10 @@ def push_script_to_json(input_json, input_script, output_json):
     with open(output_json, 'w') as outfile:
         json.dump(jdict, outfile, indent=4, sort_keys=True)
 
-GLOBAL_VERBOSE=False
-
-
 if __name__ == "__main__":
 
     parser   = argparse.ArgumentParser()
     parser.add_argument("-j", "--jobinfo",  help="json job description or jobid", required=True)
-    parser.add_argument("-jg", "--jsongeneric",  help="generic json job description")
     parser.add_argument("-a", "--authfile", help="File with auth info")
     parser.add_argument("-r", "--request",  help="Request type [submit, status, cancel, fetch, list]", required=True)
     parser.add_argument("-v", "--verbose",  dest='verbose', action='store_true', help="Verbose output")
@@ -182,8 +179,18 @@ if __name__ == "__main__":
             print "[ERROR] Authfile missing. Cannot submit job without authfile"
             exit(-1)
 
-        push_script_to_json(args.jsongeneric, args.script, args.jobinfo)
-        uid = submit_task(args.jobinfo, args.authfile)
+        # The user has provided the script in a file that has to be inserted into the json
+        # job description template the user provides in jobinfo.
+        if args.script :
+            # We want to retain the original template the user provides and create a temporary
+            # hidden file that has the script 
+            tmp_file = "./.tmp.{0}.{1}.json".format(os.path.basename(args.jobinfo), int(time.time()))            
+            push_script_to_json(args.jobinfo, args.script, tmp_file)                        
+            uid = submit_task(tmp_file,     args.authfile)
+
+        else:
+            uid = submit_task(args.jobinfo, args.authfile)
+
         if uid["status"] == "Success":
             print "[{0}] Job_id: {1}".format(uid["status"], uid["job_id"])
         else:
