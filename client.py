@@ -13,10 +13,10 @@ import requests
 import urllib
 
 SERVER_URL = "http://ec2-52-2-217-165.compute-1.amazonaws.com:8888"
-SUBMIT_URL=SERVER_URL+"/rest/v1/submit_task"
-STATUS_URL=SERVER_URL+"/rest/v1/status_task"
-CANCEL_URL=SERVER_URL+"/rest/v1/cancel_task"
-LIST_URL  =SERVER_URL+"/rest/v1/list_tasks"
+SUBMIT_URL = SERVER_URL+"/rest/v1/submit_task"
+STATUS_URL = SERVER_URL+"/rest/v1/status_task"
+CANCEL_URL = SERVER_URL+"/rest/v1/cancel_task"
+LIST_URL = SERVER_URL+"/rest/v1/list_tasks"
 
 
 def debug_print(string):
@@ -29,7 +29,7 @@ def download_file(URL, filename):
 
 
 def get_access_token(authfile):
-    url  = open(authfile, 'r').read()
+    url = open(authfile, 'r').read()
     url_parts = urlparse(url)
     parts = url_parts.query.split('&')
     auth = {}
@@ -45,7 +45,7 @@ def submit_task(task_desc_file, auth_file):
 
     with open(task_desc_file, 'r') as f:
         task_desc = f.read()
-    data                 = ast.literal_eval(task_desc)
+    data = ast.literal_eval(task_desc)
     data["access_token"] = auth['access_token']
     r = requests.post(SUBMIT_URL, data=data)
 
@@ -54,8 +54,8 @@ def submit_task(task_desc_file, auth_file):
 
 def cancel_task(jobid):
     debug_print("Cancelling task : {0}".format(jobid))
-    debug_print ("{0} - {1} - {2}".format(record["job_id"],
-                 record["status"], record["reason"]))
+    debug_print("{0} - {1} - {2}".format(record["job_id"],
+                record["status"], record["reason"]))
     return True
 
 
