@@ -62,10 +62,11 @@ be http urls or S3 urls.
 ```json
 {
   "user_email"         : "<EMAIL_ADDRESS_REGISTERED_WITH_TURING>",
-  "executable"         : "/bin/bash test.sh",
+  "executable"         : "/bin/echo 'Hello World!'",
+  "jobname"            : "Hello World on Kotta",
   "queue"              : "Test",
-  "script_name"        : "test.sh",
-  "script"             : "#!/bin/bash \n echo 'Hello World' &> foo.txt ",
+  "script_name"        : "none.sh",
+  "script"             : "", 
   "jobtype"            : "script",
   "output_file_stdout" : "STDOUT.txt",
   "output_file_stderr" : "STDERR.txt",

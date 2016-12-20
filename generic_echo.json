@@ -1,5 +1,6 @@
 { "user_email"         : "yadunand@uchicago.edu",
   "executable"         : "/bin/echo 'Hello World!'",
+  "jobname"            : "Hello World on Kotta",
   "queue"              : "Test",
   "script_name"        : "none.sh",
   "script"             : "", 

@@ -1,5 +1,6 @@
 { "user_email"         : "yadunand@uchicago.edu",
   "executable"         : "/bin/bash test.sh",
+  "jobname"            : "Script example",
   "queue"              : "Test",
   "script_name"        : "test.sh",
   "script"             : "#!/bin/bash \n shuf -i 1-1000", 
