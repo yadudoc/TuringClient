@@ -8,19 +8,33 @@ import argparse
 import bottle
 import os
 import ast
-from urlparse import urlparse
+
+try:
+    # Python2
+    from urlparse import urlparse
+except ImportError:
+    # Python3
+    from urllib.parse import urlparse
+
+try:
+    import future
+except ImportError:
+    pass
+
 import requests
 import urllib
+
 
 SERVER_URL="http://ec2-52-2-217-165.compute-1.amazonaws.com:8888"
 SUBMIT_URL=SERVER_URL+"/rest/v1/submit_task"
 STATUS_URL=SERVER_URL+"/rest/v1/status_task"
 CANCEL_URL=SERVER_URL+"/rest/v1/cancel_task"
 LIST_URL  =SERVER_URL+"/rest/v1/list_tasks"
+UPLOAD_URL=SERVER_URL+"/rest/v1/upload_url"
 
 def debug_print(string):
     if GLOBAL_VERBOSE :
-        print string
+        print(string)
 
 def download_file(URL, filename):
     urllib.urlretrieve(URL, filename)
@@ -67,7 +81,7 @@ def status_task(jobid):
     status = {}
     record = requests.get(STATUS_URL + "/{0}".format(jobid))
     if record.status_code != 200:
-        print "[ERROR] Failed to fetch job, please check jobid"
+        print("[ERROR] Failed to fetch job, please check jobid")
         exit(-1)
 
     results = record.json()
@@ -82,7 +96,7 @@ def status_task(jobid):
             else :
                 v = bcolors.WARNING + v + bcolors.ENDC
 
-        print "{0:20}  | {1:50}".format(k, str(v).strip())
+        print("{0:20}  | {1:50}".format(k, str(v).strip()))
         
     return results
 
@@ -93,11 +107,11 @@ def fetch_outputs(jobid):
     
     results = record.json()
     if results['status'] != 'completed':
-        print "JOB[{0}] is not in completed state. Results cannot be fetched".format(jobid)
+        print("JOB[{0}] is not in completed state. Results cannot be fetched".format(jobid))
         exit(-1)
 
     try:
-        print "Creating directory : {0}".format(jobid)
+        print("Creating directory : {0}".format(jobid))
         os.makedirs(jobid)
     except:
         pass
@@ -110,11 +124,11 @@ def fetch_outputs(jobid):
             if v.startswith('<a href='):
                 url = v.strip('<a href=').split('">')[0].strip('\"')
                 fname = "{0}/{1}".format(jobid, v.strip('</a>').split('>')[-1])
-                print "Downloading file   : {0}".format(bcolors.OKGREEN + fname +bcolors.ENDC)
+                print("Downloading file   : {0}".format(bcolors.OKGREEN + fname +bcolors.ENDC))
                 download_file('{0}'.format(url), fname)
             else:
                 v = v.strip('<i>').strip('</i>')
-                print "File not available : {0}".format(bcolors.FAIL + v + bcolors.ENDC)
+                print("File not available : {0}".format(bcolors.FAIL + v + bcolors.ENDC))
         
     return results
     
@@ -124,17 +138,37 @@ def list_jobs(authfile):
     data = {"access_token" : auth['access_token']}
     r = requests.get(LIST_URL, data=data)
 
-    print r
+    print(r)
     results =  r.json()
     if results['status'] == "Success":
-        print "{0:40}|{1:15}|{2:10}|{3:20}".format("JOBID", "STATUS", "JOBTYPE", "SUBMIT_STAMP")
+        print("{0:40}|{1:15}|{2:10}|{3:20}".format("JOBID", "STATUS", "JOBTYPE", "SUBMIT_STAMP"))
         for index in results['items']:
-            print "{0:40}|{1:15}|{2:10}|{3:20}".format(results['items'][index]["job_id"],
+            print("{0:40}|{1:15}|{2:10}|{3:20}".format(results['items'][index]["job_id"],
                                                        results['items'][index]["status"],
                                                        results['items'][index]["jobtype"],
-                                                       results['items'][index]["submit_stamp"])
+                                                       results['items'][index]["submit_stamp"]))
 
     return results
+
+
+def upload_file(authfile, filepath):
+    auth = get_access_token(authfile)
+
+    data = {"access_token" : auth['access_token']}
+    r = requests.get(UPLOAD_URL, data=data)
+
+    print(r)
+    results =  r.json()
+    if results['status'] == "Success":
+        print("{0:40}|{1:15}|{2:10}|{3:20}".format("JOBID", "STATUS", "JOBTYPE", "SUBMIT_STAMP"))
+        for index in results['items']:
+            print("{0:40}|{1:15}|{2:10}|{3:20}".format(results['items'][index]["job_id"],
+                                                       results['items'][index]["status"],
+                                                       results['items'][index]["jobtype"],
+                                                       results['items'][index]["submit_stamp"]))
+
+    return results
+
     
 GLOBAL_VERBOSE=False
 
@@ -154,18 +188,18 @@ if __name__ == "__main__":
 
     if args.request.lower() == "submit":
         if not args.authfile :
-            print "[ERROR] Authfile missing. Cannot submit job without authfile"
+            print("[ERROR] Authfile missing. Cannot submit job without authfile")
             exit(-1)
             
         uid = submit_task(args.jobinfo, args.authfile)
         if uid["status"] == "Success":
-            print "[{0}] Job_id: {1}".format(uid["status"], uid["job_id"])
+            print("[{0}] Job_id: {1}".format(uid["status"], uid["job_id"]))
         else:
-            print "[{0}] Reason: {1}".format(uid["status"], uid["reason"])
+            print("[{0}] Reason: {1}".format(uid["status"], uid["reason"]))
 
     elif args.request.lower() == "status":
         results= status_task( args.jobinfo)
-        print results["status"]
+        print(results["status"])
 
     elif args.request.lower() == "cancel":
         cancel_task( args.jobinfo)
@@ -175,13 +209,13 @@ if __name__ == "__main__":
 
     elif args.request.lower() == "list":
         if not args.authfile :
-            print "[ERROR] Authfile missing. Cannot submit job without authfile"
+            print("[ERROR] Authfile missing. Cannot submit job without authfile")
             exit(-1)
 
         list_jobs( args.authfile)
 
     else:
-        print "Unknown request"
+        print("Unknown request")
         exit(-1)
     
     exit(0)
