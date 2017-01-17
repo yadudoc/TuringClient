@@ -32,6 +32,8 @@ CANCEL_URL=SERVER_URL+"/rest/v1/cancel_task"
 LIST_URL  =SERVER_URL+"/rest/v1/list_tasks"
 UPLOAD_URL=SERVER_URL+"/rest/v1/upload_url"
 
+GLOBAL_VERBOSE=False
+
 def debug_print(string):
     if GLOBAL_VERBOSE :
         print(string)
@@ -39,15 +41,17 @@ def debug_print(string):
 def download_file(URL, filename):
     urllib.urlretrieve(URL, filename)
 
+
 def get_access_token(authfile):
-    url  = open(authfile, 'r').read()
+    url = open(authfile, 'r').read()
     url_parts = urlparse(url)
     parts = url_parts.query.split('&')
-    auth  = {}
+    auth = {}
     for p in parts:
         args = p.split('=')
-        auth[args[0]] = args[1]        
+        auth[args[0]] = args[1]
     return auth
+
 
 def submit_task(task_desc_file, auth_file):
 
@@ -55,16 +59,19 @@ def submit_task(task_desc_file, auth_file):
 
     with open(task_desc_file, 'r') as f:
         task_desc = f.read()
-    data                 = ast.literal_eval(task_desc)
+    data = ast.literal_eval(task_desc)
     data["access_token"] = auth['access_token']
     r = requests.post(SUBMIT_URL, data=data)
 
     return r.json()
 
+
 def cancel_task(jobid):
     debug_print("Cancelling task : {0}".format(jobid))
-    debug_print ("{0} - {1} - {2}".format(record["job_id"], record["status"], record["reason"]))
+    debug_print("{0} - {1} - {2}".format(record["job_id"],
+                record["status"], record["reason"]))
     return True
+
 
 class bcolors:
     HEADER    = '\033[95m'
@@ -75,6 +82,7 @@ class bcolors:
     ENDC      = '\033[0m'
     BOLD      = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 def status_task(jobid):
     debug_print("Status task : {0}".format(jobid))
@@ -91,20 +99,21 @@ def status_task(jobid):
         if k == "outputs" :
             if v.startswith('<a href'):
                 v = bcolors.OKGREEN + v.strip('</a>').split('>')[-1]  + bcolors.ENDC
-            elif v.startswith('<i>'):                
+            elif v.startswith('<i>'):
                 v = bcolors.FAIL + v.strip('<i>').strip('</i>') + bcolors.ENDC
             else :
                 v = bcolors.WARNING + v + bcolors.ENDC
 
         print("{0:20}  | {1:50}".format(k, str(v).strip()))
-        
+
     return results
+
 
 def fetch_outputs(jobid):
     debug_print("Status task : {0}".format(jobid))
     status = {}
     record = requests.get(STATUS_URL + "/{0}".format(jobid))
-    
+
     results = record.json()
     if results['status'] != 'completed':
         print("JOB[{0}] is not in completed state. Results cannot be fetched".format(jobid))
@@ -129,9 +138,10 @@ def fetch_outputs(jobid):
             else:
                 v = v.strip('<i>').strip('</i>')
                 print("File not available : {0}".format(bcolors.FAIL + v + bcolors.ENDC))
-        
+
     return results
-    
+
+
 def list_jobs(authfile):
     auth = get_access_token(authfile)
 
@@ -169,9 +179,18 @@ def upload_file(authfile, filepath):
 
     return results
 
-    
-GLOBAL_VERBOSE=False
 
+def push_script_to_json(input_json, input_script, output_json):
+    with open(input_json) as json_data:
+        jdict = json.load(json_data)
+
+    with open(input_script) as f:
+        cont = f.read()
+
+    jdict['script'] = cont
+
+    with open(output_json, 'w') as outfile:
+        json.dump(jdict, outfile, indent=4, sort_keys=True)
 
 if __name__ == "__main__":
 
@@ -180,6 +199,7 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--authfile", help="File with auth info")
     parser.add_argument("-r", "--request",  help="Request type [submit, status, cancel, fetch, list]", required=True)
     parser.add_argument("-v", "--verbose",  dest='verbose', action='store_true', help="Verbose output")
+    parser.add_argument("-s", "--script", help="script filename")
     args   = parser.parse_args()
 
 
@@ -190,8 +210,19 @@ if __name__ == "__main__":
         if not args.authfile :
             print("[ERROR] Authfile missing. Cannot submit job without authfile")
             exit(-1)
-            
-        uid = submit_task(args.jobinfo, args.authfile)
+
+        # The user has provided the script in a file that has to be inserted into the json
+        # job description template the user provides in jobinfo.
+        if args.script :
+            # We want to retain the original template the user provides and create a temporary
+            # hidden file that has the script 
+            tmp_file = "./.tmp.{0}.{1}.json".format(os.path.basename(args.jobinfo), int(time.time()))            
+            push_script_to_json(args.jobinfo, args.script, tmp_file)                        
+            uid = submit_task(tmp_file,     args.authfile)
+
+        else:
+            uid = submit_task(args.jobinfo, args.authfile)
+
         if uid["status"] == "Success":
             print("[{0}] Job_id: {1}".format(uid["status"], uid["job_id"]))
         else:
@@ -217,11 +248,5 @@ if __name__ == "__main__":
     else:
         print("Unknown request")
         exit(-1)
-    
+
     exit(0)
-
-
-
-
-    
-

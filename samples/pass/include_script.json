@@ -1,12 +1,10 @@
 { "user_email"         : "yadunand@uchicago.edu",
-  "executable"         : "/bin/echo 'Hello World!'",
-  "jobname"            : "Hello World on Kotta",
+  "executable"         : "/usr/bin/python test.py",
   "queue"              : "Test",
-  "script_name"        : "none.sh",
-  "script"             : "", 
+  "script_name"        : "test.py",
   "jobtype"            : "script",
+  "inputs"             : "s3://klab-jobs/test.txt",
   "output_file_stdout" : "STDOUT.txt",
   "output_file_stderr" : "STDERR.txt",
-  "outputs"            : "foo.txt",
   "walltime"           : "5"
 }
