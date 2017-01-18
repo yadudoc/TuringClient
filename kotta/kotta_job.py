@@ -26,7 +26,8 @@ class KottaJob(object):
         self.__valid_stati= ['unsubmitted', 'pending', 'staging_inputs', 'cancelled',
                              'completed', 'failed', 'processing', 'staging_outputs']
         self.__job_desc.update(kwargs)
-
+        
+    
     def submit(self, Kconn):
         response  = Kconn.submit_task(self.__job_desc)        
         if response['status'] == "Success":
@@ -72,6 +73,10 @@ class KottaJob(object):
             raise TypeError
 
     @property
+    def jobname(self):
+        return self.desc.get('jobname', self.job_id)
+
+    @property
     def outputs(self):
         return self.desc.get('outputs', [])
 
@@ -113,12 +118,62 @@ class KottaJob(object):
 
 
     def add_inputs(self, inputs):
+        if not inputs:
+            return
+
         if self.__job_desc['inputs']:            
             self.__job_desc['inputs'] = self.__job_desc['inputs'] + ',' + ','.join(inputs)
         else:
             self.__job_desc['inputs'] = ','.join(inputs)
+
     def add_outputs(self, outputs):
+        if not outputs:
+            return 
+
         if self.__job_desc['outputs']:
             self.__job_desc['outputs'] = self.__job_desc['outputs'] + ',' + ','.join(outputs)
         else:
             self.__job_desc['outputs'] = ','.join(outputs)
+
+    @property
+    def stdout(self):
+        if self.status == "completed":
+            for output in self.outputs:
+                if output.file == 'STDOUT.txt':
+                    return output
+        else:
+            return None
+
+    @property
+    def stderr(self):
+        if self.status == "completed":
+            for output in self.outputs:
+                if output.file == 'STDERR.txt':
+                    return output
+        else:
+            return None
+                
+    def get_returns(self, return_file='out.pkl'):
+        if self.__status == "completed": 
+            #print(self.job.outputs)
+            results  = [output for output in self.outputs if output.file == 'out.pkl' ]
+            if results:
+                for result in results:
+                    try:
+                        result.fetch()
+                    except Exception as e:
+                        print("ERROR: Failed to download result")
+                        print("Returning job object for inspection")
+                        return None
+
+                    return pickle.load(open(result.file, 'rb'))
+                else:
+                    print("ERROR: No result was captured")
+                    return None
+            else:
+                print("ERROR: Job {0}".format(self.__status))
+                return None
+        else:
+            print("WARN: Job status != completed")
+            return None
+

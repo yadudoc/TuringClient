@@ -20,7 +20,8 @@ class bcolors:
     BOLD      = '\033[1m'
     UNDERLINE = '\033[4m'
     
-GLOBAL_VERBOSE = True
+GLOBAL_VERBOSE = False  #True
+
 def debug_print(string):
     if GLOBAL_VERBOSE :
         print(string)
@@ -103,4 +104,3 @@ class Kotta(object):
             s3_url =  "s3://{0}{1}".format(parsed.netloc.split('.')[0],
                                            parsed.path)
         return s3_url
-            

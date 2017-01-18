@@ -55,46 +55,67 @@ class KottaFn(object):
                                                                            os.path.basename(out_pkl))
                          }
         
-        print("*"*40)
-        print(self.job.desc)
-        print("*"*40)
-
         submit_st = self.job.submit(self.conn)
         if not submit_st:
-            print ("ERROR: Submit failed")
-            return False
+            print ("ERROR: Submit failed, return job object")
+            return self.job
         
         if self.block :
-            self.job.wait(self.conn)
-            print("Debug : Result : {0}".format(self.job.desc))            
-            
+            status = self.job.wait(self.conn)
+
+            if status == "completed": 
+                #print(self.job.outputs)
+                results  = [output for output in self.job.outputs if output.file == 'out.pkl' ]
+                if results:
+                    for result in results:
+
+                        try:
+                            result.fetch()
+                        except Exception as e:
+                            print("ERROR: Failed to download result")
+                            print("Returning job object for inspection")
+                            return (None, self.job)
+
+                        return pickle.load(open(result.file, 'rb'))
+                else:
+                    print("ERROR: No result was captured")
+                    return self.job
+            else:
+                print("Job {0}".format(status))
+                print("Returning job object")
+                return self.job
+
         else:
             return self.job
 
-        return 
+        return self.job
     
-def kottajob(conn, queue, walltime, block=True, **flags):
+def kottajob(conn, queue, walltime, block=True, inputs=[], outputs=[], **flags):
     '''
     kottajob decorator    
     '''
 
     exec_sh = '''#!/bin/bash
-    pip3 install PyMySQL
+    apt-get -y install python3 python3-pip
+    pip3 install PyMySQL jupyter
     tar -xzf serialize.tar.gz
     python3 runner.py -i $1 -o $2
     '''
     job = KottaJob(jobtype     = 'script',
-                   inputs      = 's3://klab-jobs/inputs/yadu/runner.py, s3://klab-jobs/inputs/yadu/serialize.tar.gz',
+                   inputs      = 's3://klab-jobs/inputs/yadu/runner.py, s3://klab-jobs/inputs/yadu/serialize.tar.gz' ,
                    output_file_stdout = "STDOUT.txt",
                    output_file_stderr = "STDERR.txt",
                    script_name = 'exec.sh',
                    script      = exec_sh,
                    walltime    = walltime,
                    queue       = queue)
+    job.add_inputs(inputs)
+    #job.add_outputs(outputs)
 
-    print(job.desc)
+    #print(job.desc)
+
     def kottajob_fn(f):
-        print("In the inner function with arg f : {0}".format(f))        
+        #print("In the inner function with arg f : {0}".format(f))        
         return KottaFn(conn, job, f, block, **flags)
     
     return kottajob_fn

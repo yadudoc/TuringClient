@@ -1,5 +1,8 @@
 from urllib.request import urlretrieve
+import urllib.request
+import shutil
 import re
+import os
 from urllib.parse import urlparse
 import urllib.error
 
@@ -54,6 +57,7 @@ class KOut(object):
         return self.__file
     
     def fetch(self):
+
         if self.url:
             return urlretrieve(self.url, self.file)
         else:
