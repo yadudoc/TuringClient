@@ -16,8 +16,8 @@ class KottaJob(object):
         
     def __init__ (self, **kwargs) :
         # Setting defaults
-        self.__job_desc = {'inputs'   : [],
-                           'outputs'  : [],
+        self.__job_desc = {'inputs'   : '',
+                           'outputs'  : '',
                            'walltime' : 300,
                            'queue'    : 'Test'
                      }
@@ -26,13 +26,14 @@ class KottaJob(object):
         self.__valid_stati= ['unsubmitted', 'pending', 'staging_inputs', 'cancelled',
                              'completed', 'failed', 'processing', 'staging_outputs']
         self.__job_desc.update(kwargs)
-            
+
     def submit(self, Kconn):
         response  = Kconn.submit_task(self.__job_desc)        
         if response['status'] == "Success":
             self.job_id = response['job_id']
             self.__status = 'pending'
             return True
+
         else:
             print("[ERROR] Job submission failed : {0}".format(response.get('reason', response)))
             return False                
@@ -40,17 +41,16 @@ class KottaJob(object):
     def cancel(self, Kconn):
         raise NotImplementedError
 
-    def wait(self, Kconn, maxwait=600, sleep=2 ):
-        for i in range(int(maxwait/sleep)):
-            cur_status = self.update_status(Kconn)
+    def wait(self, Kconn, maxwait=600, sleep=2, silent=True):
+        for i in range(int(maxwait/sleep)):            
+            cur_status = self.status(Kconn)
             if cur_status in [ 'completed', 'cancelled', 'failed' ]:
-                return True
+                return cur_status
             time.sleep(sleep)
-        
+            
         return False
 
     def status(self, Kconn):
-        print ("Status: Fn :")
         if self.job_id :
             st = Kconn.status_task(self.job_id)
             self.set_status(st.get('status'))
@@ -110,3 +110,15 @@ class KottaJob(object):
         for k, v in self.__dict__.items():
             setattr(result, k, deepcopy(v, memo))
         return result
+
+
+    def add_inputs(self, inputs):
+        if self.__job_desc['inputs']:            
+            self.__job_desc['inputs'] = self.__job_desc['inputs'] + ',' + ','.join(inputs)
+        else:
+            self.__job_desc['inputs'] = ','.join(inputs)
+    def add_outputs(self, outputs):
+        if self.__job_desc['outputs']:
+            self.__job_desc['outputs'] = self.__job_desc['outputs'] + ',' + ','.join(outputs)
+        else:
+            self.__job_desc['outputs'] = ','.join(outputs)

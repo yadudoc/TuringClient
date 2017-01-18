@@ -85,7 +85,7 @@ class Kotta(object):
         # Get a signed url
         c = { "access_token" : self._creds.get("access_token"),
               "refresh_token" : self._creds.get("refresh_token"),
-               "filepath" : path
+              "filepath" : path
              }
         r = requests.post(self.__upload_url, data=c)        
         response = r.json()

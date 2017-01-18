@@ -5,7 +5,6 @@ import json
 import time
 import uuid
 import argparse
-import bottle
 import os
 import ast
 from serialize import unpack_apply_message
@@ -63,6 +62,5 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--outputfile", help="Serialized output file")
     parser.add_argument("-v", "--verbose",  dest='verbose', action='store_true', help="Verbose output")
     args   = parser.parse_args()
-
 
     execute(args.inputfile, args.outputfile)
