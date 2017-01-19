@@ -1,0 +1,11 @@
+{ "user_email"         : "yadunand@uchicago.edu",
+  "executable"         : "/bin/bash test.sh",
+  "queue"              : "Prod",
+  "script_name"        : "test.sh",
+  "script"             : "#!/bin/bash \n shuf -i 1-1000 \n echo 'Count' ; wc -l 1m_shuffled.txt ", 
+  "jobtype"            : "script",
+  "output_file_stdout" : "STDOUT.txt",
+  "output_file_stderr" : "STDERR.txt",
+  "walltime"           : "5",
+  "inputs"             : "s3://klab-jobs/1m_shuffled.txt"
+}

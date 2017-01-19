@@ -1,0 +1,11 @@
+{ "user_email"         : "yadunand@uchicago.edu",
+  "executable"         : "/usr/bin/python test.py",
+  "queue"              : "Test",
+  "script_name"        : "test.py",
+  "script"             : "#!/usr/bin/env python \nwith open('test.txt') as d:\n\tprint d.readlines()", 
+  "jobtype"            : "script",
+  "inputs"             : "s3://klabjstor/access_test.txt",
+  "output_file_stdout" : "STDOUT.txt",
+  "output_file_stderr" : "STDERR.txt",
+  "walltime"           : "5"
+}
