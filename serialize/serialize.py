@@ -23,8 +23,9 @@ from .canning import (
     can, uncan, can_sequence, uncan_sequence, CannedObject,
     istype, sequence_types,
 )
-from jupyter_client.session import MAX_ITEMS, MAX_BYTES
 
+MAX_ITEMS = 64
+MAX_BYTES = 1024
 
 if PY3:
     buffer = memoryview
