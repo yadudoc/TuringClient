@@ -6,7 +6,6 @@ import json
 
 import requests
 import json
-import pycurl
 import time
 from urllib.parse import urlparse
 #import urlparse # update to urllib.urlparse for python3
@@ -19,13 +18,16 @@ class KottaJob(object):
         self.__job_desc = {'inputs'   : '',
                            'outputs'  : '',
                            'walltime' : 300,
-                           'queue'    : 'Test'
-                     }
+                           'queue'    : 'Test',
+                           'output_file_stdout' : 'STDOUT.txt',
+                           'output_file_stderr' : 'STDERR.txt',
+                           }
         self.__job_id     = []
-        self.__status     = 'unsubmitted'
+        self.__status     = 'unsubmitted'        
         self.__valid_stati= ['unsubmitted', 'pending', 'staging_inputs', 'cancelled',
                              'completed', 'failed', 'processing', 'staging_outputs']
         self.__job_desc.update(kwargs)
+
         
     
     def submit(self, Kconn):
