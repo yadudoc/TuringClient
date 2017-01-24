@@ -2,13 +2,11 @@ import os
 import pickle
 import serialize
 import uuid
-import json
-
 import requests
 import json
-import pycurl
+
 from urllib.parse import urlparse
-#import urlparse # update to urllib.urlparse for python3
+
 
 class bcolors:
     HEADER    = '\033[95m'
