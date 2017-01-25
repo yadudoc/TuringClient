@@ -9,14 +9,14 @@ class KottaFn(object):
     This is modelled off of ipython parallel's RemoteFunction code
     view has to have some context of kotta
     """
-    def __init__ (self, conn, job, f, block=True, **flags):
+    def __init__ (self, conn, job_desc, f, block=True, **flags):
         self.__name__ = f.__name__
         self.__doc__  = f.__doc__
         self.__signature__ = getattr(f, '__signature__', None)  
         self.conn     = conn
         self.func     = f
         self.flags    = flags
-        self.job      = job
+        self.job_desc = job_desc
         self.block    = block
       
     @staticmethod
@@ -26,11 +26,19 @@ class KottaFn(object):
             pickle.dump(obj, sfile)       
 
     def __call__ (self, *args, **kwargs) :
-                
+
+        self.job = KottaJob(**self.job_desc)
+
+        if 'inputs' in kwargs:
+            self.job.add_inputs(kwargs['inputs'])
+
+        if 'outputs' in kwargs:
+            self.job.add_outputs(kwargs['outputs'])
+
         fn_buf  = serialize.pack_apply_message(self.func, args, kwargs,
                                         buffer_threshold=1024*1024,
                                         item_threshold=1024)
-        #print(fn_buf, len(fn_buf))
+
         fn_id   = uuid.uuid4()
         user    = os.environ['USER']
         pkl_dir = "pkl".format(user)
@@ -89,33 +97,45 @@ class KottaFn(object):
             return self.job
 
         return self.job
-    
-def kottajob(conn, queue, walltime, block=True, inputs=[], outputs=[], **flags):
+
+
+def kottajob(conn, queue, walltime, block=True, requirements=None, inputs=[], outputs=[], **flags):
     '''
     kottajob decorator    
     '''
+    req_string = '''cat <<EOF > requirements.txt
+PyMySQL
+jupyter
+{0}
+EOF
+pip3 install -r requirements.txt
+'''
 
+    # Setup the requirements on the remote side
+    if requirements :
+        req_string = req_string.format(requirements)
+        
     exec_sh = '''#!/bin/bash
-    apt-get -y install python3 python3-pip
-    pip3 install PyMySQL jupyter
-    tar -xzf serialize.tar.gz
-    python3 runner.py -i $1 -o $2
-    '''
-    job = KottaJob(jobtype     = 'script',
-                   inputs      = 's3://klab-jobs/inputs/yadu/runner.py, s3://klab-jobs/inputs/yadu/serialize.tar.gz' ,
-                   output_file_stdout = "STDOUT.txt",
-                   output_file_stderr = "STDERR.txt",
-                   script_name = 'exec.sh',
-                   script      = exec_sh,
-                   walltime    = walltime,
-                   queue       = queue)
-    job.add_inputs(inputs)
-    #job.add_outputs(outputs)
+apt-get -y install python3 python3-pip
+{0}
+tar -xzf serialize.tar.gz
+python3 runner.py -i $1 -o $2
+    '''.format(req_string)
 
-    #print(job.desc)
+    input_csl = 's3://klab-jobs/inputs/yadu/runner.py, s3://klab-jobs/inputs/yadu/serialize.tar.gz'
+    if inputs:
+        input_csl = input_csl + ',' + ','.join(inputs)
+
+    job_desc  =  {'jobtype'            : 'script',
+                  'inputs'             : input_csl,
+                  'output_file_stdout' : 'STDOUT.txt',
+                  'output_file_stderr' : 'STDERR.txt',
+                  'script_name'        : 'exec.sh',
+                  'script'             : exec_sh,
+                  'walltime'           : walltime,
+                  'queue'              : queue }
 
     def kottajob_fn(f):
-        #print("In the inner function with arg f : {0}".format(f))        
-        return KottaFn(conn, job, f, block, **flags)
+        return KottaFn(conn, job_desc, f, block, **flags)
     
     return kottajob_fn
