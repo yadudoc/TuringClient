@@ -1,4 +1,4 @@
-from urllib.request import urlretrieve
+from urllib.request import urlretrieve, urlopen
 import urllib.request
 import shutil
 import re
@@ -50,14 +50,29 @@ class KOut(object):
     
     @property
     def s3_url(self):
-        return self.__s3_url        
+        return self.__s3_url
+
+    def get_data(self):
+        if self.url:
+            return urlretrieve(self.url, self.file)
+        else:
+            print("[WARN] File {0} was not generated on Kotta. Nothing to fetch".format(self.file))
+            return False
+
+        return 
         
     @property
     def file(self):        
         return self.__file
+
+    def read(self):
+        if self.url:
+            return urlopen(self.url).read()
+        else:
+            print("[WARN] Url not available for read")
+            return None        
     
     def fetch(self):
-
         if self.url:
             return urlretrieve(self.url, self.file)
         else:
