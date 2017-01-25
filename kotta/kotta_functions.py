@@ -114,13 +114,15 @@ pip3 install -r requirements.txt
     # Setup the requirements on the remote side
     if requirements :
         req_string = req_string.format(requirements)
+    else:
+        req_string = req_string.format('')
         
     exec_sh = '''#!/bin/bash
 apt-get -y install python3 python3-pip
 {0}
 tar -xzf serialize.tar.gz
 python3 runner.py -i $1 -o $2
-    '''.format(req_string)
+'''.format(req_string)
 
     input_csl = 's3://klab-jobs/inputs/yadu/runner.py, s3://klab-jobs/inputs/yadu/serialize.tar.gz'
     if inputs:
