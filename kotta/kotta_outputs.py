@@ -67,7 +67,7 @@ class KOut(object):
 
     def read(self):
         if self.url:
-            return urlopen(self.url).read()
+            return urlopen(self.url).read().decode('utf-8')
         else:
             print("[WARN] Url not available for read")
             return None        
