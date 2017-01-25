@@ -14,7 +14,7 @@ from ipython_genutils.py3compat import string_types, iteritems, buffer_to_bytes,
 
 from . import codeutil  # This registers a hook when it's imported
 
-from traitlets.log import get_logger
+#from traitlets.log import get_logger
 
 if py3compat.PY3:
     buffer = memoryview
