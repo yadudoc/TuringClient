@@ -21,6 +21,9 @@ run_with_version()
     grep -i "Job_id" $results
 }
 
+
+python3 setup.py install
+
 # Check if we are on bastion
 # We can do submission tests only from bastion, therefore skip the submit/cancel/status tests unless you are on bastion
 
@@ -29,7 +32,7 @@ then
     echo "On bastion"
     run_with_version 2 ./samples/pass/
     run_with_version 3
-else
+else    
     echo "Cannot run any remote tests right now from non-bastion nodes"
     echo "Done"
 fi
