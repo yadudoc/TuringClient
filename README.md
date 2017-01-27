@@ -1,6 +1,6 @@
 # REST Client for Cloud Kotta
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Build Status](https://travis-ci.org/yadudoc/TuringClient.svg?branch=master)]
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Build Status](https://travis-ci.org/yadudoc/kotta_client.svg?branch=master)]
 
 This is documentation for the REST client that can be used to manage jobs on the Cloud Kotta platform.
 TuringCompute.net is an instance of the Cloud Kotta architecture hosted by the Knowledge Lab on AWS.
