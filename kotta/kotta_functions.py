@@ -99,24 +99,20 @@ class KottaFn(object):
         return self.job
 
 
-def kottajob(conn, queue, walltime, block=True, requirements=None, inputs=[], outputs=[], **flags):
+def kottajob(conn, queue, walltime, block=True, requirements='', inputs=[], outputs=[], **flags):
     '''
     kottajob decorator    
     '''
+    
+    # Setup the requirements on the remote side
     req_string = '''cat <<EOF > requirements.txt
 PyMySQL
 jupyter
 {0}
 EOF
 pip3 install -r requirements.txt
-'''
+'''.format(requirements)
 
-    # Setup the requirements on the remote side
-    if requirements :
-        req_string = req_string.format(requirements)
-    else:
-        req_string = req_string.format('')
-        
     exec_sh = '''#!/bin/bash
 apt-get -y install python3 python3-pip
 {0}
