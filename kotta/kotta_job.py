@@ -8,7 +8,6 @@ import requests
 import json
 import time
 from urllib.parse import urlparse
-#import urlparse # update to urllib.urlparse for python3
 from .kotta_outputs import KOut
     
 class KottaJob(object):
@@ -58,10 +57,20 @@ class KottaJob(object):
             st = Kconn.status_task(self.job_id)
             self.set_status(st.get('status'))
             if 'outputs' in st:
-                
-                #print ("Raw: ", st['outputs'])
-                #print("*"*40)
-                outputs = [KOut(o) for o in st['outputs']]
+
+                outputs = []
+                for o in st['outputs']:
+                    kout = KOut(o)
+
+                    if kout.file.endswith('STDOUT.txt'):
+                        st['STDOUT'] = kout
+                        
+                    elif kout.file.endswith('STDERR.txt'):
+                        st['STDERR'] = kout
+
+                    else:
+                        outputs.extend([kout])
+                        
                 st['outputs'] = outputs
 
             self.__job_desc.update(st)
@@ -138,24 +147,27 @@ class KottaJob(object):
             self.__job_desc['outputs'] = ','.join(outputs)
 
     @property
-    def stdout(self):
-        if self.status == "completed":
-            for output in self.outputs:
-                if output.file == 'STDOUT.txt':
-                    return output
-        else:
-            return None
+    def STDOUT(self):
+        if self.__status == "completed":
+            
+            if 'STDOUT' in self.__job_desc:
+                return self.__job_desc['STDOUT'].read()
+            else:
+                print("[WARN] STDOUT not found in self.desc")
+
+        return None
 
     @property
-    def stderr(self):
-        if self.status == "completed":
-            for output in self.outputs:
-                if output.file == 'STDERR.txt':
-                    return output
-        else:
-            return None
+    def STDERR(self):
+        if self.__status == "completed":
+            if 'STDERR' in self.desc:
+                return self.desc['STDERR'].read()
+            else:
+                print("[WARN] STDERR not found in self.desc")
+            
+        return None
                 
-    def get_returns(self, return_file='out.pkl'):
+    def get_results(self, return_file='out.pkl'):
         if self.__status == "completed": 
             #print(self.job.outputs)
             results  = [output for output in self.outputs if output.file == 'out.pkl' ]
