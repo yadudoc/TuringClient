@@ -2,7 +2,10 @@ import pickle
 import serialize
 import uuid
 import os
+import logging
 from .kotta_job import KottaJob
+
+logger  = logging.getLogger(__name__)
 
 class KottaFn(object):
     """
@@ -47,15 +50,12 @@ class KottaFn(object):
         fn_pkl  = "{0}/{1}.in.pkl".format(pkl_dir, fn_id)
         out_pkl = "{0}/out.pkl".format(pkl_dir, fn_id)
 
-        #print("Debug pkl_file : {0}".format(fn_pkl))
-
         with open(fn_pkl, 'wb') as sfile:            
             pickle.dump(fn_buf, sfile)
 
         s3_url  = self.conn.upload_file(fn_pkl)
 
-        #print("Uploaded url : ", s3_url)
-
+        
         self.job.add_inputs([s3_url])
         self.job.add_outputs([os.path.basename(out_pkl)])
         self.job.desc = { 'jobname' : 'Kotta Ipython {0}'.format(self.func.__name__),
@@ -64,8 +64,9 @@ class KottaFn(object):
                          }
         
         submit_st = self.job.submit(self.conn)
-        if not submit_st:
+        if not submit_st:            
             print ("ERROR: Submit failed, return job object")
+            logging.error("Submit failed, return job object")
             return self.job
         
         if self.block :
@@ -80,6 +81,7 @@ class KottaFn(object):
                         try:
                             result.fetch()
                         except Exception as e:
+                            logging.error("ERROR: Failed to download result")
                             print("ERROR: Failed to download result")
                             print("Returning job object for inspection")
                             return (None, self.job)
@@ -87,10 +89,12 @@ class KottaFn(object):
                         return pickle.load(open(result.file, 'rb'))
                 else:
                     print("ERROR: No result was captured")
+                    logging.error("ERROR: No result was captured")
                     return self.job
             else:
                 print("Job {0}".format(status))
                 print("Returning job object")
+                logging.debug("Returning job object")
                 return self.job
 
         else:
@@ -133,6 +137,8 @@ python3 runner.py -i $1 -o $2
                   'walltime'           : walltime,
                   'queue'              : queue }
 
+    logging.debug('Job desc : \n {0}'.format(job_desc))
+    
     def kottajob_fn(f):
         return KottaFn(conn, job_desc, f, block, **flags)
     
