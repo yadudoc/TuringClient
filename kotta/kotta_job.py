@@ -3,13 +3,15 @@ import pickle
 import serialize
 import uuid
 import json
-
 import requests
-import json
 import time
+import logging
+
 from urllib.parse import urlparse
 from .kotta_outputs import KOut
-    
+
+logger  = logging.getLogger(__name__)
+
 class KottaJob(object):
         
     def __init__ (self, **kwargs) :

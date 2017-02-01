@@ -1,10 +1,13 @@
-from urllib.request import urlretrieve, urlopen
 import urllib.request
 import shutil
 import re
 import os
-from urllib.parse import urlparse
 import urllib.error
+import logging
+from urllib.request import urlretrieve, urlopen
+from urllib.parse   import urlparse
+
+logger  = logging.getLogger(__name__)
 
 class KOut(object):    
     @staticmethod
@@ -24,11 +27,13 @@ class KOut(object):
             return "s3://{0}/{1}".format(s3_bucket, s3_key)
 
         else:
+            logger.warn("Unknown URL type.")
             print("Type 3")
             return url
         
     def __init__ (self, filestring):
 
+        logger.debug("Creating object for {0}".format(filestring))
         if filestring.startswith('<a href="') and filestring.endswith('</a>') :
             stripped = filestring[9:][:-4]   
             self.__url, self.__file = stripped.split('">')        
@@ -56,7 +61,7 @@ class KOut(object):
         if self.url:
             return urlretrieve(self.url, self.file)
         else:
-            print("[WARN] File {0} was not generated on Kotta. Nothing to fetch".format(self.file))
+            logger.warn("[WARN] File {0} was not generated on Kotta. Nothing to fetch".format(self.file))
             return False
 
         return 
@@ -69,14 +74,14 @@ class KOut(object):
         if self.url:
             return urlopen(self.url).read().decode('utf-8')
         else:
-            print("[WARN] Url not available for read")
+            logger.warn("Url not available for read")
             return None        
     
     def fetch(self):
         if self.url:
             return urlretrieve(self.url, self.file)
         else:
-            print("[WARN] File {0} was not generated on Kotta. Nothing to fetch".format(self.file))
+            logger.warn("File {0} was not generated on Kotta. Nothing to fetch".format(self.file))
             return False
     
 
