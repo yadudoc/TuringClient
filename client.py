@@ -5,7 +5,6 @@ import json
 import time
 import uuid
 import argparse
-import bottle
 import os
 import ast
 
