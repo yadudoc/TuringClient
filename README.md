@@ -18,8 +18,8 @@ Here are the steps to get install dependencies and get the requisite code.
 
 ```bash
 sudo pip install requests
-git clone https://github.com/yadudoc/TuringClient
-cd TuringClient
+git clone https://github.com/yadudoc/kotta_client
+cd kotta_client
 ```
 
 ## Auth
