@@ -15,7 +15,7 @@ def set_stream_logger(name='kotta', level=logging.DEBUG, format_string=None):
 
     if format_string is None:
         format_string = "%(asctime)s %(name)s [%(levelname)s] %(message)s"
-          
+
     logger = logging.getLogger(name)
     logger.setLevel(level)
     handler = logging.StreamHandler()
@@ -23,7 +23,7 @@ def set_stream_logger(name='kotta', level=logging.DEBUG, format_string=None):
     formatter = logging.Formatter(format_string)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-            
+
 
 class NullHandler (logging.Handler):
     ''' Setup default logging to /dev/null since this is library.
@@ -33,6 +33,5 @@ class NullHandler (logging.Handler):
         pass
 
 
-    
+
 logging.getLogger('kotta').addHandler(NullHandler())
-    

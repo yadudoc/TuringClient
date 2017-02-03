@@ -13,7 +13,7 @@ from .kotta_outputs import KOut
 logger  = logging.getLogger(__name__)
 
 class KottaJob(object):
-        
+
     def __init__ (self, **kwargs) :
         # Setting defaults
         self.__job_desc = {'inputs'   : '',
@@ -24,15 +24,15 @@ class KottaJob(object):
                            'output_file_stderr' : 'STDERR.txt',
                            }
         self.__job_id     = []
-        self.__status     = 'unsubmitted'        
+        self.__status     = 'unsubmitted'
         self.__valid_stati= ['unsubmitted', 'pending', 'staging_inputs', 'cancelled',
                              'completed', 'failed', 'processing', 'staging_outputs']
         self.__job_desc.update(kwargs)
 
-        
-    
+
+
     def submit(self, Kconn):
-        response  = Kconn.submit_task(self.__job_desc)        
+        response  = Kconn.submit_task(self.__job_desc)
         if response['status'] == "Success":
             self.job_id = response['job_id']
             self.__status = 'pending'
@@ -40,18 +40,18 @@ class KottaJob(object):
 
         else:
             print("[ERROR] Job submission failed : {0}".format(response.get('reason', response)))
-            return False                
-        
+            return False
+
     def cancel(self, Kconn):
         raise NotImplementedError
 
     def wait(self, Kconn, maxwait=600, sleep=2, silent=True):
-        for i in range(int(maxwait/sleep)):            
+        for i in range(int(maxwait/sleep)):
             cur_status = self.status(Kconn)
             if cur_status in [ 'completed', 'cancelled', 'failed' ]:
                 return cur_status
             time.sleep(sleep)
-            
+
         return False
 
     def status(self, Kconn):
@@ -66,13 +66,13 @@ class KottaJob(object):
 
                     if kout.file.endswith('STDOUT.txt'):
                         st['STDOUT'] = kout
-                        
+
                     elif kout.file.endswith('STDERR.txt'):
                         st['STDERR'] = kout
 
                     else:
                         outputs.extend([kout])
-                        
+
                 st['outputs'] = outputs
 
             self.__job_desc.update(st)
@@ -94,15 +94,15 @@ class KottaJob(object):
         return self.desc.get('outputs', [])
 
     #######################################################################################
-    """ Property desc managing __job_desc    
+    """ Property desc managing __job_desc
     """
     def set_desc(self, desc_dict):
         self.__job_desc.update(desc_dict)
-        
+
     def get_desc(self):
         return self.__job_desc
-    
-    desc = property(get_desc, set_desc, None, "Description of the Kotta-Job")    
+
+    desc = property(get_desc, set_desc, None, "Description of the Kotta-Job")
     #######################################################################################
     """ Property job_id managing __job_id
     """
@@ -111,14 +111,14 @@ class KottaJob(object):
             return self.__job_id[-1]
         else:
             return None
-        
-    def set_job_id(self, jobid):        
+
+    def set_job_id(self, jobid):
         self.__job_id.extend([jobid])
-        
+
     def del_job_id(self):
         self.__job_id = []
-                
-    job_id = property(get_job_id, set_job_id, del_job_id, "Job identifier for the Kotta-Job")        
+
+    job_id = property(get_job_id, set_job_id, del_job_id, "Job identifier for the Kotta-Job")
     #######################################################################################
 
     def __deepcopy__(self, memo):
@@ -134,14 +134,14 @@ class KottaJob(object):
         if not inputs:
             return
 
-        if self.__job_desc['inputs']:            
+        if self.__job_desc['inputs']:
             self.__job_desc['inputs'] = self.__job_desc['inputs'] + ',' + ','.join(inputs)
         else:
             self.__job_desc['inputs'] = ','.join(inputs)
 
     def add_outputs(self, outputs):
         if not outputs:
-            return 
+            return
 
         if self.__job_desc['outputs']:
             self.__job_desc['outputs'] = self.__job_desc['outputs'] + ',' + ','.join(outputs)
@@ -151,7 +151,7 @@ class KottaJob(object):
     @property
     def STDOUT(self):
         if self.__status == "completed":
-            
+
             if 'STDOUT' in self.__job_desc:
                 return self.__job_desc['STDOUT'].read()
             else:
@@ -166,11 +166,11 @@ class KottaJob(object):
                 return self.desc['STDERR'].read()
             else:
                 print("[WARN] STDERR not found in self.desc")
-            
+
         return None
-                
+
     def get_results(self, return_file='out.pkl'):
-        if self.__status == "completed": 
+        if self.__status == "completed":
             #print(self.job.outputs)
             results  = [output for output in self.outputs if output.file == 'out.pkl' ]
             if results:
@@ -192,4 +192,3 @@ class KottaJob(object):
         else:
             print("WARN: Job status != completed")
             return None
-
