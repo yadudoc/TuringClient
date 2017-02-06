@@ -9,7 +9,6 @@ import pickle
 import copy
 import time
 import logging
-from urllib.parse import urlparse
 
 from .kotta_outputs import KOut
 
@@ -162,6 +161,8 @@ class KottaJob(object):
         self.__job_id.extend([jobid])
 
     def del_job_id(self):
+        """ Delete all job_id's
+        """
         self.__job_id = []
 
 
@@ -174,8 +175,8 @@ class KottaJob(object):
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            setattr(result, k, copy.deepcopy(v, memo))
+        for key, val in self.__dict__.items():
+            setattr(result, key, copy.deepcopy(val, memo))
         return result
 
 
@@ -211,7 +212,7 @@ class KottaJob(object):
             if 'STDOUT' in self.__job_desc:
                 return self.__job_desc['STDOUT'].read()
             else:
-                logger.warn(" STDOUT not found in self.desc")
+                logger.warning(" STDOUT not found in self.desc")
 
         return None
 
@@ -224,7 +225,7 @@ class KottaJob(object):
             if 'STDERR' in self.desc:
                 return self.desc['STDERR'].read()
             else:
-                logger.warn("STDERR not found in self.desc")
+                logger.warning("STDERR not found in self.desc")
 
         return None
 
@@ -233,7 +234,7 @@ class KottaJob(object):
         """
         if self.__status == "completed":
             #print(self.job.outputs)
-            results  = [output for output in self.outputs if output.file == 'out.pkl' ]
+            results  = [output for output in self.outputs if output.file == return_file ]
             if results:
                 for result in results:
                     try:
@@ -246,8 +247,8 @@ class KottaJob(object):
                     return pickle.load(open(result.file, 'rb'))
 
             else:
-                logger.error("Job had no results {0}".format(self.__status))
+                logger.error("Job had no results %s", self.__status)
                 return None
         else:
-            print("WARN: Job status != completed")
+            logger.warning("WARN: Job status != completed")
             return None
