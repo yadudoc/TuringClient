@@ -1,12 +1,20 @@
+""" Kotta Library
+
+This module provides a simple interface to the Cloud Kotta system. In addition to the batch-like
+submit model, a decorator ``@kottajob`` is provided that allows the user to wrap a python function
+and execute it remotely on Cloud Kotta.
+
+"""
+import logging
 from kotta.kotta import Kotta
 from kotta.kotta_job import KottaJob
-from kotta.kotta_functions import *
-import logging
+from kotta.kotta_functions import kottajob, KottaFn
+
 
 __author__  = 'Yadu Nand Babuji'
 __version__ = '0.1.0'
 
-__all__ = [Kotta, KottaJob, KottaFn, kottajob]
+__all__ = ['Kotta', 'KottaJob', 'KottaFn', 'kottajob']
 
 
 def set_stream_logger(name='kotta', level=logging.DEBUG, format_string=None):
@@ -25,7 +33,7 @@ def set_stream_logger(name='kotta', level=logging.DEBUG, format_string=None):
     logger.addHandler(handler)
 
 
-class NullHandler (logging.Handler):
+class NullHandler(logging.Handler):
     ''' Setup default logging to /dev/null since this is library.
     '''
 
