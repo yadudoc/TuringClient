@@ -5,10 +5,12 @@ functions such as submit, cancel, status.
 
 """
 import os
-import requests
 import json
 import logging
 from urllib.parse import urlparse
+
+import requests
+
 
 logger  = logging.getLogger(__name__)
 
@@ -93,16 +95,16 @@ class Kotta(object):
                   "refresh_token" : self._creds.get("refresh_token"),
                   "filepath" : path }
 
-        r = requests.post(self.__upload_url, data=creds)
-        response = r.json()
-        if r.status_code != 200:
+        req_res = requests.post(self.__upload_url, data=creds)
+        response = req_res.json()
+        if req_res.status_code != 200:
             print ("ERROR: Failed to upload data :\n {0}".format(response.get('reason', 'Unknown')))
             return -1
         else:
             self._upload(response.get('upload_url'), path)
-            #r = requests.put(response.get('upload_url'), files=files )
-            #if r.status_code != 200 :
-            #    print("Upload failed due to : \n {0}".format(r.text))
+            #req_res = requests.put(response.get('upload_url'), files=files )
+            #if req_res.status_code != 200 :
+            #    print("Upload failed due to : \n {0}".format(req_res.text))
             #    return None
             parsed =  urlparse(response.get('upload_url')) #.split('?')[0]
             s3_url =  "s3://{0}{1}".format(parsed.netloc.split('.')[0],
