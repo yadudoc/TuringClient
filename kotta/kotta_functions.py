@@ -1,4 +1,10 @@
 """ Wrapping python functions to conform to a KottaJob object.
+
+The control flow sequence is as follows :
+
+@kottajob decorator creates an instance of KottaFn.
+A call to KottaFn constructs a KottaJob and calls it.
+
 """
 
 import pickle
@@ -134,7 +140,7 @@ def kottajob(conn, queue, walltime, block=True, requirements='', inputs=[], **fl
     # Setup the requirements on the remote side
     req_string = '''cat <<EOF > requirements.txt
 PyMySQL
-jupyter
+ipython_genutils
 {0}
 EOF
 pip3 install -r requirements.txt
@@ -142,6 +148,7 @@ pip3 install -r requirements.txt
 
     exec_sh = '''#!/bin/bash
 apt-get -y install python3 python3-pip
+pip3 install -U pip
 {0}
 tar -xzf serialize.tar.gz
 python3 runner.py -i $1 -o $2
