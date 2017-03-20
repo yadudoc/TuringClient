@@ -21,8 +21,14 @@ class KottaJob(object):
 
     """
 
-    def __init__ (self, **kwargs) :
+    def __init__ (self, kconn=None, job_id=None, **kwargs) :
         """ Create the job
+        If kconn and job_id are provided, the job object is updated to reflect the job launched on
+        Kotta that matched the job_id.
+
+        Else:
+            **kwargs : are the job attributes such as inputs, outputs, walltime, queue etc.
+
         """
         # Setting defaults
         self.__job_desc = {'inputs'   : '',
@@ -38,6 +44,11 @@ class KottaJob(object):
         self.__valid_stati= ['unsubmitted', 'pending', 'staging_inputs', 'cancelled',
                              'completed', 'failed', 'processing', 'staging_outputs']
         self.__job_desc.update(kwargs)
+
+        if job_id :
+            print("Fooo")
+            self.__job_id = [job_id]
+            self.status(kconn)
 
 
 
