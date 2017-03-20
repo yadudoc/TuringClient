@@ -46,7 +46,6 @@ class KottaJob(object):
         self.__job_desc.update(kwargs)
 
         if job_id :
-            print("Fooo")
             self.__job_id = [job_id]
             self.status(kconn)
 
