@@ -74,6 +74,7 @@ class KOut(object):
     def get_data(self):
         """ Retrieve the data from the URL to the FILE
         """
+        print("Deprecated. Please use fetch")
         if self.url:
             return urlretrieve(self.url, self.file)
         else:
@@ -97,11 +98,19 @@ class KOut(object):
             logger.warning("Url not available for read")
             return None
 
-    def fetch(self):
+    def fetch(self, filename=None):
         """ Fetch the remote url to the local file
+
+        Kwargs:
+             - filename(string) : Specify path to download files to. Default=None
+
         """
         if self.url:
-            return urlretrieve(self.url, self.file)
+            if filename:
+                return urlretrieve(self.url, filename)
+            else:
+                return urlretrieve(self.url, self.file)
+
         else:
             logger.warning("File %s was not generated on Kotta. Nothing to fetch", self.file)
             return False
