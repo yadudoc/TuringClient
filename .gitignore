@@ -1,6 +1,8 @@
 *~
 *pyc
 .tmp*json
-auth.file
+auth.*
 build/
 dist/
+kottabooks/.ipynb_checkpoints/
+kottabooks.egg_info/
